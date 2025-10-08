@@ -3,82 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WI Images</title>
+    <title>WI Images Lite - Pexels Browser</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Simple custom scrollbar for a better look */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0d1117;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #1f2937;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #374151;
-        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0d1117; }
+        ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #374151; }
+
         /* Ensure the modal image doesn't exceed viewport height */
-        #modal-image {
-            max-height: 80vh;
-        }
+        #modal-image { max-height: 80vh; }
+
         /* Custom download button style */
         .download-button-custom {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            height: 48px;
-            padding-left: 24px;
-            padding-right: 24px;
-            font-size: 1rem;
-            font-weight: 600;
-            color: #ffffff;
-            background-color: #1a202c;
-            border: 1px solid #4a5568;
-            border-radius: 0.5rem;
+            display: inline-flex; align-items: center; justify-content: center;
+            height: 48px; padding-left: 24px; padding-right: 24px;
+            font-size: 1rem; font-weight: 600; color: #ffffff;
+            background-color: #1a202c; border: 1px solid #4a5568; border-radius: 0.5rem;
             transition: background-color 0.2s, border-color 0.2s;
         }
-        .download-button-custom:hover {
-            background-color: #2d3748;
-            border-color: #6b7280;
-        }
-        .download-button-custom:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+        .download-button-custom:hover { background-color: #2d3748; border-color: #6b7280; }
+        .download-button-custom:disabled { opacity: 0.5; cursor: not-allowed; }
+
         /* Disable text selection and dragging */
         img, .no-select {
-            -webkit-user-select: none;  /* Safari */
-            -moz-user-select: none;     /* Firefox */
-            -ms-user-select: none;      /* IE10+ */
-            user-select: none;          /* Standard */
-            -webkit-user-drag: none;    /* Safari */
-            -moz-user-drag: none;       /* Firefox */
-            -ms-user-drag: none;        /* IE/Edge */
-            user-drag: none;            /* Standard */
+            -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
+            -webkit-user-drag: none; -moz-user-drag: none; -ms-user-drag: none; user-drag: none;
         }
+
         /* Watermark for the popup image preview */
         #modal-content::after {
-            content: 'WI Images';
-            position: absolute;
-            top: 50%;
-            left: 50%;
+            content: 'WI Images'; position: absolute; top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 5vw;
-            font-weight: bold;
-            color: white;
-            opacity: 0.5; /* 50% opacity */
-            pointer-events: none; /* Allows clicking through the watermark text */
-            z-index: 10;
+            font-size: 5vw; font-weight: bold; color: white;
+            opacity: 0.5; pointer-events: none; z-index: 10;
         }
     </style>
 </head>
 <body class="bg-[#0D1117] text-gray-300 font-sans no-select" oncontextmenu="return false;">
 
-    <div class="container mx-auto px-4 py-8">
+    <div id="ad-template" class="hidden">
+        <div class="flex items-center justify-center bg-[#161B22] rounded-lg shadow-lg w-full h-full min-h-[250px] p-2">
+            <iframe data-aa='2412848' src='//ad.a-ads.com/2412848/?size=250x250&background_color=0D1117&title_color=4eb1f7' style='border:0; padding:0; width:250px; height:250px; overflow:hidden; display: block;'></iframe>
+        </div>
+    </div>
 
+    <div class="container mx-auto px-4 py-8">
         <header class="text-center mb-8">
             <div class="flex items-center justify-center">
                 <h1 class="flex items-center text-5xl font-extrabold dark:text-white">Wi Images<span class="bg-blue-100 text-blue-800 text-2xl font-semibold me-2 px-2.5 py-0.5 rounded-sm dark:bg-blue-200 dark:text-blue-800 ms-2">Lite</span></h1><br>
@@ -120,19 +91,22 @@
             </span>
             <div class="inline-flex mt-2 xs:mt-0">
                 <button id="prev-button" class="flex items-center justify-center px-4 h-10 text-base font-medium text-white bg-gray-800 rounded-s hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
-                    <svg class="w-3.5 h-3.5 me-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5H1m0 0 4 4M1 5l4-4"/>
-                    </svg>
+                    <svg class="w-3.5 h-3.5 me-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5H1m0 0 4 4M1 5l4-4"/></svg>
                     Prev
                 </button>
                 <button id="next-button" class="flex items-center justify-center px-4 h-10 text-base font-medium text-white bg-gray-800 border-0 border-s border-gray-700 rounded-e hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
                     Next
-                    <svg class="w-3.5 h-3.5 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
-                    </svg>
+                    <svg class="w-3.5 h-3.5 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/></svg>
                 </button>
             </div>
         </nav>
+
+        <footer class="mt-12">
+            <div class="text-center text-gray-500 text-sm">
+                <p>Ads fund our creators. If you wish to browse with no ads, visit our main <a class="font-bold text-gray-400 hover:text-white" href="https://wiimages.world">website.</a></p>
+                <p class="mt-2">©2025 The Wi Images Group. <a class="font-bold text-gray-400 hover:text-white" href="https://wiimages.world/terms-lite">Terms and conditions</a> | <a class="font-bold text-gray-400 hover:text-white" href="https://wiimages.world/legal-lite">Legal</a></p>
+            </div>
+        </footer>
     </div>
 
     <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-80 z-50 flex justify-center items-center p-4">
@@ -140,21 +114,13 @@
             <button id="modal-close-button" class="absolute top-2 right-3 text-gray-400 hover:text-white text-3xl font-bold z-20">&times;</button>
             <img id="modal-image" src="" alt="Popup Image" class="w-auto h-auto rounded-md mx-auto mb-6 no-select" oncontextmenu="return false;">
             <button id="download-button" class="download-button-custom">
-                <svg class="w-5 h-5 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
+                <svg class="w-5 h-5 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                 Free 720p Download (Watermarked)
             </button>
             <p id="download-status" class="text-sm text-gray-400 mt-2"></p>
         </div>
     </div>
-    <footer>
-        <div class="text-center text-gray-500">
-            <p>Ads fund our creators. If you wish to browse with no ads, visit our main </p><a class="font-bold" href="https://wiimages.world">website.</a>
-            <p>©2025 The Wi Images Group. </p><a class="font-bold" href="https://wiimages.world/terms-lite">Terms and conditions</a><br><a class="font-bold" href="https://wiimages.world/legal-lite">Legal</a>
-        </div>
-        <br>
-    </footer>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // --- CONFIGURATION ---
@@ -163,6 +129,7 @@
             const adRatio = 10; // Show 1 ad per 10 images
 
             // --- DOM ELEMENTS ---
+            const adTemplate = document.getElementById('ad-template');
             const searchForm = document.getElementById('search-form');
             const searchInput = document.getElementById('search-input');
             const imageContainer = document.getElementById('image-container');
@@ -177,7 +144,7 @@
             const downloadButton = document.getElementById('download-button');
             const downloadStatus = document.getElementById('download-status');
 
-            // --- STATE MANAGEMENT ---
+            // --- STATE ---
             let currentQuery = '';
             let currentPage = 1;
             let currentPhotos = [];
@@ -188,15 +155,12 @@
             nextButton.addEventListener('click', handleNextClick);
             imageContainer.addEventListener('click', handleImageClick);
             modalCloseButton.addEventListener('click', closeModal);
-            modal.addEventListener('click', (e) => { // Close modal if overlay is clicked
-                if (e.target === modal) {
-                    closeModal();
-                }
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeModal();
             });
             downloadButton.addEventListener('click', handleDownload);
 
-
-            // --- HANDLER FUNCTIONS ---
+            // --- HANDLERS ---
             function handleSearchSubmit(e) {
                 e.preventDefault();
                 const query = searchInput.value.trim();
@@ -206,40 +170,31 @@
                     fetchAndDisplayImages(currentQuery, currentPage);
                 }
             }
-
             function handlePrevClick() {
                 if (currentPage > 1) {
                     currentPage--;
                     fetchAndDisplayImages(currentQuery, currentPage);
                 }
             }
-            
             function handleNextClick() {
                 currentPage++;
                 fetchAndDisplayImages(currentQuery, currentPage);
             }
-
             function handleImageClick(e) {
                 const card = e.target.closest('[data-photo-id]');
                 if (card) {
                     const photoId = parseInt(card.dataset.photoId, 10);
                     const photo = currentPhotos.find(p => p.id === photoId);
-                    if (photo) {
-                        openModal(photo);
-                    }
+                    if (photo) openModal(photo);
                 }
             }
-
             function handleDownload() {
                 const photoId = downloadButton.dataset.photoId;
                 const photoUrl = downloadButton.dataset.photoUrl;
-                if(photoId && photoUrl) {
-                    downloadAndWatermark(photoUrl, photoId);
-                }
+                if(photoId && photoUrl) downloadAndWatermark(photoUrl, photoId);
             }
 
-
-            // --- API & DISPLAY FUNCTIONS ---
+            // --- API & DISPLAY ---
             async function fetchAndDisplayImages(query, page) {
                 loader.classList.remove('hidden');
                 imageContainer.innerHTML = '';
@@ -252,8 +207,8 @@
                     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
                     const data = await response.json();
                     
-                    currentPhotos = data.photos; // Store photos for modal access
-                    displayItems(data.photos); // Use the new display function
+                    currentPhotos = data.photos;
+                    displayItems(data.photos);
                     updatePagination(data);
                 } catch (error) {
                     console.error("Error fetching from Pexels API:", error);
@@ -271,24 +226,16 @@
                 }
 
                 photos.forEach((photo, index) => {
-                    // Create and append the image card
                     const imageCard = document.createElement('button');
                     imageCard.className = 'group relative overflow-hidden rounded-lg bg-[#161B22] shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#0D1117] focus:ring-blue-500';
                     imageCard.setAttribute('data-photo-id', photo.id);
-                    imageCard.innerHTML = `
-                        <img src="${photo.src.large}" alt="${photo.alt || 'Pexels Image'}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110 no-select" oncontextmenu="return false;">
-                    `;
+                    imageCard.innerHTML = `<img src="${photo.src.large}" alt="${photo.alt || 'Pexels Image'}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110 no-select" oncontextmenu="return false;">`;
                     imageContainer.appendChild(imageCard);
 
-                    // Insert an ad after every `adRatio` images
-                    if ((index + 1) % adRatio === 0) {
-                        const adElement = document.createElement('div');
-                        adElement.className = 'flex items-center justify-center bg-[#161B22] rounded-lg shadow-lg w-full h-full min-h-[250px] p-2';
-                        adElement.innerHTML = `
-                            <iframe data-aa='2412848' src='//ad.a-ads.com/2412848/?size=250x250&background_color=0D1117&title_color=4eb1f7'
-                                style='border:0; padding:0; width:250px; height:250px; overflow:hidden; display: block;'></iframe>
-                        `;
-                        imageContainer.appendChild(adElement);
+                    // == NEW: Clone ad from template instead of creating it ==
+                    if ((index + 1) % adRatio === 0 && adTemplate) {
+                        const adClone = adTemplate.firstElementChild.cloneNode(true);
+                        imageContainer.appendChild(adClone);
                     }
                 });
             }
@@ -302,13 +249,12 @@
                 const totalResults = data.total_results;
                 const startItem = (data.page - 1) * imagesPerPage + 1;
                 const endItem = Math.min(startItem + imagesPerPage - 1, totalResults);
-                pageInfo.innerHTML = `
-                    Showing <span class="font-semibold text-white">${startItem}</span> to <span class="font-semibold text-white">${endItem}</span> of <span class="font-semibold text-white">${totalResults.toLocaleString()}</span> Results`;
+                pageInfo.innerHTML = `Showing <span class="font-semibold text-white">${startItem}</span> to <span class="font-semibold text-white">${endItem}</span> of <span class="font-semibold text-white">${totalResults.toLocaleString()}</span> Results`;
                 prevButton.disabled = !data.prev_page;
                 nextButton.disabled = !data.next_page;
             }
 
-            // --- MODAL FUNCTIONS ---
+            // --- MODAL ---
             function openModal(photo) {
                 modalImage.src = photo.src.large2x;
                 modalImage.alt = photo.alt || 'Pexels Image';
@@ -334,7 +280,6 @@
                 image.onload = () => {
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
-                    
                     const targetHeight = 720;
                     const scale = targetHeight / image.height;
                     const targetWidth = image.width * scale;
@@ -369,7 +314,6 @@
 
                 image.src = `${photoUrl}?auto=compress&cs=tinysrgb&h=720`;
             }
-
         });
     </script>
 </body>
