@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WI Images - Pexels Browser</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Simple custom scrollbar for a better look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0d1117;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1f2937;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #374151;
+        }
+        /* Ensure the modal image doesn't exceed viewport height */
+        #modal-image {
+            max-height: 80vh;
+        }
+        /* Custom download button style */
+        .download-button-custom {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 48px; /* Equivalent to h-12 to fit text and icon nicely */
+            padding-left: 24px; /* px-6 */
+            padding-right: 24px; /* px-6 */
+            font-size: 1rem; /* text-base */
+            font-weight: 600; /* font-semibold */
+            color: #ffffff; /* text-white */
+            background-color: #1a202c; /* bg-gray-800 */
+            border: 1px solid #4a5568; /* border-gray-700 */
+            border-radius: 0.5rem; /* rounded-lg */
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+        .download-button-custom:hover {
+            background-color: #2d3748; /* hover:bg-gray-700 */
+            border-color: #6b7280;
+        }
+        .download-button-custom:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        /* Disable text selection and dragging */
+        img, .no-select {
+            -webkit-user-select: none;  /* Safari */
+            -moz-user-select: none;     /* Firefox */
+            -ms-user-select: none;      /* IE10+ */
+            user-select: none;          /* Standard */
+            -webkit-user-drag: none;    /* Safari */
+            -moz-user-drag: none;       /* Firefox */
+            -ms-user-drag: none;        /* IE/Edge */
+            user-drag: none;            /* Standard */
+        }
+    </style>
+</head>
+<body class="bg-[#0D1117] text-gray-300 font-sans no-select" oncontextmenu="return false;">
+
+    <div class="container mx-auto px-4 py-8">
+
+        <header class="text-center mb-8">
+            <h1 class="text-5xl font-bold text-blue-500">WI Images</h1>
+            <p class="text-gray-400 mt-2">Browse high-quality images from Pexels</p>
+        </header>
+
+        <div class="max-w-2xl mx-auto mb-10">
+            <form id="search-form" class="flex gap-2">
+                <input 
+                    type="text" 
+                    id="search-input"
+                    placeholder="Search for an image..."
+                    class="w-full px-4 py-3 bg-[#161B22] border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
+                    required
+                >
+                <button 
+                    type="submit"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200"
+                >
+                    Search
+                </button>
+            </form>
+        </div>
+
+        <main id="image-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            <div class="col-span-full text-center text-gray-500">
+                <p>Search for something to see the results here. ✨</p>
+            </div>
+        </main>
+        
+        <div id="loader" class="hidden text-center my-10">
+             <svg class="animate-spin h-8 w-8 text-blue-500 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+        </div>
+
+        <nav id="pagination-controls" class="flex flex-col items-center mt-12 hidden">
+            <span id="page-info" class="text-sm text-gray-400">
+                Showing <span class="font-semibold text-white">1</span> to <span class="font-semibold text-white">50</span> of <span class="font-semibold text-white">10000</span> Results
+            </span>
+            <div class="inline-flex mt-2 xs:mt-0">
+                <button id="prev-button" class="flex items-center justify-center px-4 h-10 text-base font-medium text-white bg-gray-800 rounded-s hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <svg class="w-3.5 h-3.5 me-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5H1m0 0 4 4M1 5l4-4"/>
+                    </svg>
+                    Prev
+                </button>
+                <button id="next-button" class="flex items-center justify-center px-4 h-10 text-base font-medium text-white bg-gray-800 border-0 border-s border-gray-700 rounded-e hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                    Next
+                    <svg class="w-3.5 h-3.5 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
+                    </svg>
+                </button>
+            </div>
+        </nav>
+    </div>
+
+    <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-80 z-50 flex justify-center items-center p-4">
+        <div id="modal-content" class="bg-[#161B22] rounded-lg shadow-xl p-4 relative max-w-4xl w-full text-center">
+            <button id="modal-close-button" class="absolute top-2 right-3 text-gray-400 hover:text-white text-3xl font-bold">&times;</button>
+            <img id="modal-image" src="" alt="Popup Image" class="w-auto h-auto rounded-md mx-auto mb-6 no-select" oncontextmenu="return false;">
+            <button id="download-button" class="download-button-custom">
+                <svg class="w-5 h-5 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                Free 720p Download (Watermarked)
+            </button>
+            <p id="download-status" class="text-sm text-gray-400 mt-2"></p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- CONFIGURATION ---
+            const apiKey = '2nnZ05uTysLUuar5SJHCq8iylMS5tFlWY9TUXMKkH7pSgxLQooV2C0Ei';
+            const imagesPerPage = 50;
+
+            // --- DOM ELEMENTS ---
+            const searchForm = document.getElementById('search-form');
+            const searchInput = document.getElementById('search-input');
+            const imageContainer = document.getElementById('image-container');
+            const paginationControls = document.getElementById('pagination-controls');
+            const pageInfo = document.getElementById('page-info');
+            const prevButton = document.getElementById('prev-button');
+            const nextButton = document.getElementById('next-button');
+            const loader = document.getElementById('loader');
+            const modal = document.getElementById('modal');
+            const modalImage = document.getElementById('modal-image');
+            const modalCloseButton = document.getElementById('modal-close-button');
+            const downloadButton = document.getElementById('download-button');
+            const downloadStatus = document.getElementById('download-status');
+
+            // --- STATE MANAGEMENT ---
+            let currentQuery = '';
+            let currentPage = 1;
+            let currentPhotos = [];
+
+            // --- EVENT LISTENERS ---
+            searchForm.addEventListener('submit', handleSearchSubmit);
+            prevButton.addEventListener('click', handlePrevClick);
+            nextButton.addEventListener('click', handleNextClick);
+            imageContainer.addEventListener('click', handleImageClick);
+            modalCloseButton.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => { // Close modal if overlay is clicked
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+            downloadButton.addEventListener('click', handleDownload);
+
+
+            // --- HANDLER FUNCTIONS ---
+            function handleSearchSubmit(e) {
+                e.preventDefault();
+                const query = searchInput.value.trim();
+                if (query) {
+                    currentQuery = query;
+                    currentPage = 1;
+                    fetchAndDisplayImages(currentQuery, currentPage);
+                }
+            }
+
+            function handlePrevClick() {
+                if (currentPage > 1) {
+                    currentPage--;
+                    fetchAndDisplayImages(currentQuery, currentPage);
+                }
+            }
+            
+            function handleNextClick() {
+                currentPage++;
+                fetchAndDisplayImages(currentQuery, currentPage);
+            }
+
+            function handleImageClick(e) {
+                const card = e.target.closest('[data-photo-id]');
+                if (card) {
+                    const photoId = parseInt(card.dataset.photoId, 10);
+                    const photo = currentPhotos.find(p => p.id === photoId);
+                    if (photo) {
+                        openModal(photo);
+                    }
+                }
+            }
+
+            function handleDownload() {
+                const photoId = downloadButton.dataset.photoId;
+                const photoUrl = downloadButton.dataset.photoUrl;
+                if(photoId && photoUrl) {
+                    downloadAndWatermark(photoUrl, photoId);
+                }
+            }
+
+
+            // --- API & DISPLAY FUNCTIONS ---
+            async function fetchAndDisplayImages(query, page) {
+                loader.classList.remove('hidden');
+                imageContainer.innerHTML = '';
+                paginationControls.classList.add('hidden');
+                window.scrollTo(0, 0);
+
+                const url = `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=${imagesPerPage}&page=${page}`;
+                try {
+                    const response = await fetch(url, { headers: { Authorization: apiKey } });
+                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                    const data = await response.json();
+                    
+                    currentPhotos = data.photos; // Store photos for modal access
+                    displayImages(data.photos);
+                    updatePagination(data);
+                } catch (error) {
+                    console.error("Error fetching from Pexels API:", error);
+                    imageContainer.innerHTML = `<p class="col-span-full text-center text-red-400">Failed to load images. Please try again.</p>`;
+                } finally {
+                    loader.classList.add('hidden');
+                }
+            }
+
+            function displayImages(photos) {
+                imageContainer.innerHTML = '';
+                if (photos.length === 0) {
+                    imageContainer.innerHTML = `<p class="col-span-full text-center text-gray-500">No images found for "${currentQuery}".</p>`;
+                    return;
+                }
+
+                photos.forEach(photo => {
+                    const imageCard = document.createElement('button'); // Use button for accessibility
+                    imageCard.className = 'group relative overflow-hidden rounded-lg bg-[#161B22] shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#0D1117] focus:ring-blue-500';
+                    imageCard.setAttribute('data-photo-id', photo.id);
+                    imageCard.innerHTML = `
+                        <img src="${photo.src.large}" alt="${photo.alt || 'Pexels Image'}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110 no-select" oncontextmenu="return false;">
+                    `;
+                    imageContainer.appendChild(imageCard);
+                });
+            }
+
+            function updatePagination(data) {
+                if (data.total_results === 0) {
+                    paginationControls.classList.add('hidden');
+                    return;
+                }
+                paginationControls.classList.remove('hidden');
+                const totalResults = data.total_results;
+                const startItem = (data.page - 1) * imagesPerPage + 1;
+                const endItem = Math.min(startItem + imagesPerPage - 1, totalResults);
+                pageInfo.innerHTML = `
+                    Showing <span class="font-semibold text-white">${startItem}</span> to <span class="font-semibold text-white">${endItem}</span> of <span class="font-semibold text-white">${totalResults.toLocaleString()}</span> Results`;
+                prevButton.disabled = !data.prev_page;
+                nextButton.disabled = !data.next_page;
+            }
+
+            // --- MODAL FUNCTIONS ---
+            function openModal(photo) {
+                modalImage.src = photo.src.large2x;
+                modalImage.alt = photo.alt || 'Pexels Image';
+                // Store data needed for download on the button itself
+                downloadButton.dataset.photoId = photo.id;
+                downloadButton.dataset.photoUrl = photo.src.original; // Use original for best quality
+                modal.classList.remove('hidden');
+            }
+
+            function closeModal() {
+                modal.classList.add('hidden');
+                modalImage.src = ''; // Clear image to save memory
+                downloadStatus.textContent = ''; // Reset status
+            }
+
+            // --- WATERMARK & DOWNLOAD ---
+            function downloadAndWatermark(photoUrl, photoId) {
+                downloadStatus.textContent = 'Preparing download...';
+                downloadButton.disabled = true;
+
+                const image = new Image();
+                image.crossOrigin = 'anonymous'; // Important for CORS
+
+                image.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Calculate dimensions for 720p height
+                    const targetHeight = 720;
+                    const scale = targetHeight / image.height;
+                    const targetWidth = image.width * scale;
+
+                    canvas.width = targetWidth;
+                    canvas.height = targetHeight;
+
+                    // Draw image on canvas
+                    ctx.drawImage(image, 0, 0, targetWidth, targetHeight);
+
+                    // Add watermark in the center
+                    const watermarkText = 'WI Images';
+                    const fontSize = Math.max(24, targetWidth * 0.05); // Responsive font size
+                    ctx.font = `bold ${fontSize}px Arial`;
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(watermarkText, canvas.width / 2, canvas.height / 2);
+                    
+                    // Trigger download from canvas
+                    const link = document.createElement('a');
+                    link.download = `wi-images-${photoId}-watermarked.jpg`;
+                    link.href = canvas.toDataURL('image/jpeg', 0.9); // Use JPEG with 90% quality
+                    link.click();
+                    
+                    downloadStatus.textContent = 'Download started!';
+                    downloadButton.disabled = false;
+                    setTimeout(() => downloadStatus.textContent = '', 3000); // Clear status after a few seconds
+                };
+
+                image.onerror = () => {
+                    downloadStatus.textContent = 'Error loading image for download.';
+                    downloadButton.disabled = false;
+                };
+
+                // Request image with height parameter for 720p
+                image.src = `${photoUrl}?auto=compress&cs=tinysrgb&h=720`;
+            }
+
+        });
+    </script>
+</body>
+</html>
