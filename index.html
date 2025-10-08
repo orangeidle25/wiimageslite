@@ -39,28 +39,9 @@
             font-size: 5vw; font-weight: bold; color: white;
             opacity: 0.5; pointer-events: none; z-index: 10;
         }
-        
-        /* == NEW FIX for Ad Verification == */
-        /* Hides the ad template visually without using display:none */
-        .visually-hidden-ad-template {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            margin: -1px;
-            padding: 0;
-            overflow: hidden;
-            border: 0;
-            clip: rect(0, 0, 0, 0);
-        }
     </style>
 </head>
 <body class="bg-[#0D1117] text-gray-300 font-sans no-select" oncontextmenu="return false;">
-
-    <div id="ad-template" class="visually-hidden-ad-template">
-        <div class="flex items-center justify-center bg-[#161B22] rounded-lg shadow-lg w-full h-full min-h-[250px] p-2">
-            <iframe data-aa='2412848' src='//ad.a-ads.com/2412848/?size=250x250&background_color=0D1117&title_color=4eb1f7' style='border:0; padding:0; width:250px; height:250px; overflow:hidden; display: block;'></iframe>
-        </div>
-    </div>
 
     <div class="container mx-auto px-4 py-8">
         <header class="text-center mb-8">
@@ -119,6 +100,9 @@
 
         <footer class="mt-12">
             <div class="text-center text-gray-500 text-sm">
+                <div class="my-6 flex justify-center">
+                     <iframe data-aa='2412848' src='//ad.a-ads.com/2412848/?size=250x250&background_color=0D1117&title_color=4eb1f7' style='border:0; padding:0; width:250px; height:250px; overflow:hidden; display: block;'></iframe>
+                </div>
                 <p>Ads fund our creators. If you wish to browse with no ads, visit our main <a class="font-bold text-gray-400 hover:text-white" href="https://wiimages.world">website.</a></p>
                 <p class="mt-2">©2025 The Wi Images Group. <a class="font-bold text-gray-400 hover:text-white" href="https://wiimages.world/terms-lite">Terms and conditions</a> | <a class="font-bold text-gray-400 hover:text-white" href="https://wiimages.world/legal-lite">Legal</a></p>
             </div>
@@ -145,7 +129,7 @@
             const adRatio = 10; // Show 1 ad per 10 images
 
             // --- DOM ELEMENTS ---
-            const adTemplate = document.getElementById('ad-template');
+            // adTemplate is no longer needed
             const searchForm = document.getElementById('search-form');
             const searchInput = document.getElementById('search-input');
             const imageContainer = document.getElementById('image-container');
@@ -248,9 +232,12 @@
                     imageCard.innerHTML = `<img src="${photo.src.large}" alt="${photo.alt || 'Pexels Image'}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110 no-select" oncontextmenu="return false;">`;
                     imageContainer.appendChild(imageCard);
 
-                    if ((index + 1) % adRatio === 0 && adTemplate) {
-                        const adClone = adTemplate.firstElementChild.cloneNode(true);
-                        imageContainer.appendChild(adClone);
+                    // Reverted to creating the ad element from a string
+                    if ((index + 1) % adRatio === 0) {
+                        const adElement = document.createElement('div');
+                        adElement.className = 'flex items-center justify-center bg-[#161B22] rounded-lg shadow-lg w-full h-full min-h-[250px] p-2';
+                        adElement.innerHTML = `<iframe data-aa='2412848' src='//ad.a-ads.com/2412848/?size=250x250&background_color=0D1117&title_color=4eb1f7' style='border:0; padding:0; width:250px; height:250px; overflow:hidden; display: block;'></iframe>`;
+                        imageContainer.appendChild(adElement);
                     }
                 });
             }
