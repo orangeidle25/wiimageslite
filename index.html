@@ -40,18 +40,23 @@
             opacity: 0.5; pointer-events: none; z-index: 10;
         }
         
-        /* == FIX for Ad Verification == */
-        /* Positions the ad template off-screen instead of hiding it */
-        #ad-template {
+        /* == NEW FIX for Ad Verification == */
+        /* Hides the ad template visually without using display:none */
+        .visually-hidden-ad-template {
             position: absolute;
-            top: -9999px;
-            left: -9999px;
+            width: 1px;
+            height: 1px;
+            margin: -1px;
+            padding: 0;
+            overflow: hidden;
+            border: 0;
+            clip: rect(0, 0, 0, 0);
         }
     </style>
 </head>
 <body class="bg-[#0D1117] text-gray-300 font-sans no-select" oncontextmenu="return false;">
 
-    <div id="ad-template">
+    <div id="ad-template" class="visually-hidden-ad-template">
         <div class="flex items-center justify-center bg-[#161B22] rounded-lg shadow-lg w-full h-full min-h-[250px] p-2">
             <iframe data-aa='2412848' src='//ad.a-ads.com/2412848/?size=250x250&background_color=0D1117&title_color=4eb1f7' style='border:0; padding:0; width:250px; height:250px; overflow:hidden; display: block;'></iframe>
         </div>
@@ -84,6 +89,9 @@
         </div>
 
         <main id="image-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            <div class="col-span-full text-center text-gray-500">
+                <p>Search for something to see the results here. ✨</p>
+            </div>
         </main>
         
         <div id="loader" class="hidden text-center my-10">
