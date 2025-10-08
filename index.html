@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WI Images - Pexels Browser</title>
+    <title>WI Images</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Simple custom scrollbar for a better look */
@@ -29,19 +29,19 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            height: 48px; /* Equivalent to h-12 to fit text and icon nicely */
-            padding-left: 24px; /* px-6 */
-            padding-right: 24px; /* px-6 */
-            font-size: 1rem; /* text-base */
-            font-weight: 600; /* font-semibold */
-            color: #ffffff; /* text-white */
-            background-color: #1a202c; /* bg-gray-800 */
-            border: 1px solid #4a5568; /* border-gray-700 */
-            border-radius: 0.5rem; /* rounded-lg */
+            height: 48px;
+            padding-left: 24px;
+            padding-right: 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #ffffff;
+            background-color: #1a202c;
+            border: 1px solid #4a5568;
+            border-radius: 0.5rem;
             transition: background-color 0.2s, border-color 0.2s;
         }
         .download-button-custom:hover {
-            background-color: #2d3748; /* hover:bg-gray-700 */
+            background-color: #2d3748;
             border-color: #6b7280;
         }
         .download-button-custom:disabled {
@@ -59,6 +59,20 @@
             -ms-user-drag: none;        /* IE/Edge */
             user-drag: none;            /* Standard */
         }
+        /* Watermark for the popup image preview */
+        #modal-content::after {
+            content: 'WI Images';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 5vw;
+            font-weight: bold;
+            color: white;
+            opacity: 0.5; /* 50% opacity */
+            pointer-events: none; /* Allows clicking through the watermark text */
+            z-index: 10;
+        }
     </style>
 </head>
 <body class="bg-[#0D1117] text-gray-300 font-sans no-select" oncontextmenu="return false;">
@@ -66,8 +80,10 @@
     <div class="container mx-auto px-4 py-8">
 
         <header class="text-center mb-8">
-            <h1 class="text-5xl font-bold text-blue-500">WI Images</h1>
-            <p class="text-gray-400 mt-2">Browse high-quality images from Pexels</p>
+            <div class="flex items-center justify-center">
+                <h1 class="flex items-center text-5xl font-extrabold dark:text-white">Wi Images<span class="bg-blue-100 text-blue-800 text-2xl font-semibold me-2 px-2.5 py-0.5 rounded-sm dark:bg-blue-200 dark:text-blue-800 ms-2">Lite</span></h1><br>
+            </div>
+            <p class="text-gray-400 mt-2">Browse high-quality images from Wi photographers, all for free.</p>
         </header>
 
         <div class="max-w-2xl mx-auto mb-10">
@@ -89,9 +105,6 @@
         </div>
 
         <main id="image-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-            <div class="col-span-full text-center text-gray-500">
-                <p>Search for something to see the results here. ✨</p>
-            </div>
         </main>
         
         <div id="loader" class="hidden text-center my-10">
@@ -124,7 +137,7 @@
 
     <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-80 z-50 flex justify-center items-center p-4">
         <div id="modal-content" class="bg-[#161B22] rounded-lg shadow-xl p-4 relative max-w-4xl w-full text-center">
-            <button id="modal-close-button" class="absolute top-2 right-3 text-gray-400 hover:text-white text-3xl font-bold">&times;</button>
+            <button id="modal-close-button" class="absolute top-2 right-3 text-gray-400 hover:text-white text-3xl font-bold z-20">&times;</button>
             <img id="modal-image" src="" alt="Popup Image" class="w-auto h-auto rounded-md mx-auto mb-6 no-select" oncontextmenu="return false;">
             <button id="download-button" class="download-button-custom">
                 <svg class="w-5 h-5 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -135,12 +148,19 @@
             <p id="download-status" class="text-sm text-gray-400 mt-2"></p>
         </div>
     </div>
-
+    <footer>
+        <div class="text-center text-gray-500">
+            <p>Ads fund our creators. If you wish to browse with no ads, visit our main </p><a class="font-bold" href="https://wiimages.world">website.</a>
+            <p>©2025 The Wi Images Group. </p><a class="font-bold" href="https://wiimages.world/terms-lite">Terms and conditions</a><br><a class="font-bold" href="https://wiimages.world/legal-lite">Legal</a>
+        </div>
+        <br>
+    </footer>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // --- CONFIGURATION ---
             const apiKey = '2nnZ05uTysLUuar5SJHCq8iylMS5tFlWY9TUXMKkH7pSgxLQooV2C0Ei';
             const imagesPerPage = 50;
+            const adRatio = 10; // Show 1 ad per 10 images
 
             // --- DOM ELEMENTS ---
             const searchForm = document.getElementById('search-form');
@@ -233,7 +253,7 @@
                     const data = await response.json();
                     
                     currentPhotos = data.photos; // Store photos for modal access
-                    displayImages(data.photos);
+                    displayItems(data.photos); // Use the new display function
                     updatePagination(data);
                 } catch (error) {
                     console.error("Error fetching from Pexels API:", error);
@@ -243,21 +263,33 @@
                 }
             }
 
-            function displayImages(photos) {
+            function displayItems(photos) {
                 imageContainer.innerHTML = '';
                 if (photos.length === 0) {
                     imageContainer.innerHTML = `<p class="col-span-full text-center text-gray-500">No images found for "${currentQuery}".</p>`;
                     return;
                 }
 
-                photos.forEach(photo => {
-                    const imageCard = document.createElement('button'); // Use button for accessibility
+                photos.forEach((photo, index) => {
+                    // Create and append the image card
+                    const imageCard = document.createElement('button');
                     imageCard.className = 'group relative overflow-hidden rounded-lg bg-[#161B22] shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#0D1117] focus:ring-blue-500';
                     imageCard.setAttribute('data-photo-id', photo.id);
                     imageCard.innerHTML = `
                         <img src="${photo.src.large}" alt="${photo.alt || 'Pexels Image'}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110 no-select" oncontextmenu="return false;">
                     `;
                     imageContainer.appendChild(imageCard);
+
+                    // Insert an ad after every `adRatio` images
+                    if ((index + 1) % adRatio === 0) {
+                        const adElement = document.createElement('div');
+                        adElement.className = 'flex items-center justify-center bg-[#161B22] rounded-lg shadow-lg w-full h-full min-h-[250px] p-2';
+                        adElement.innerHTML = `
+                            <iframe data-aa='2412848' src='//ad.a-ads.com/2412848/?size=250x250&background_color=0D1117&title_color=4eb1f7'
+                                style='border:0; padding:0; width:250px; height:250px; overflow:hidden; display: block;'></iframe>
+                        `;
+                        imageContainer.appendChild(adElement);
+                    }
                 });
             }
 
@@ -280,16 +312,15 @@
             function openModal(photo) {
                 modalImage.src = photo.src.large2x;
                 modalImage.alt = photo.alt || 'Pexels Image';
-                // Store data needed for download on the button itself
                 downloadButton.dataset.photoId = photo.id;
-                downloadButton.dataset.photoUrl = photo.src.original; // Use original for best quality
+                downloadButton.dataset.photoUrl = photo.src.original;
                 modal.classList.remove('hidden');
             }
 
             function closeModal() {
                 modal.classList.add('hidden');
-                modalImage.src = ''; // Clear image to save memory
-                downloadStatus.textContent = ''; // Reset status
+                modalImage.src = '';
+                downloadStatus.textContent = '';
             }
 
             // --- WATERMARK & DOWNLOAD ---
@@ -298,13 +329,12 @@
                 downloadButton.disabled = true;
 
                 const image = new Image();
-                image.crossOrigin = 'anonymous'; // Important for CORS
+                image.crossOrigin = 'anonymous';
 
                 image.onload = () => {
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
                     
-                    // Calculate dimensions for 720p height
                     const targetHeight = 720;
                     const scale = targetHeight / image.height;
                     const targetWidth = image.width * scale;
@@ -312,27 +342,24 @@
                     canvas.width = targetWidth;
                     canvas.height = targetHeight;
 
-                    // Draw image on canvas
                     ctx.drawImage(image, 0, 0, targetWidth, targetHeight);
 
-                    // Add watermark in the center
                     const watermarkText = 'WI Images';
-                    const fontSize = Math.max(24, targetWidth * 0.05); // Responsive font size
+                    const fontSize = Math.max(24, targetWidth * 0.05);
                     ctx.font = `bold ${fontSize}px Arial`;
                     ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.fillText(watermarkText, canvas.width / 2, canvas.height / 2);
                     
-                    // Trigger download from canvas
                     const link = document.createElement('a');
                     link.download = `wi-images-${photoId}-watermarked.jpg`;
-                    link.href = canvas.toDataURL('image/jpeg', 0.9); // Use JPEG with 90% quality
+                    link.href = canvas.toDataURL('image/jpeg', 0.9);
                     link.click();
                     
                     downloadStatus.textContent = 'Download started!';
                     downloadButton.disabled = false;
-                    setTimeout(() => downloadStatus.textContent = '', 3000); // Clear status after a few seconds
+                    setTimeout(() => downloadStatus.textContent = '', 3000);
                 };
 
                 image.onerror = () => {
@@ -340,7 +367,6 @@
                     downloadButton.disabled = false;
                 };
 
-                // Request image with height parameter for 720p
                 image.src = `${photoUrl}?auto=compress&cs=tinysrgb&h=720`;
             }
 
