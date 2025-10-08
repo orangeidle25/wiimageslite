@@ -103,6 +103,7 @@
                 <div class="my-6 flex justify-center">
                      <iframe data-aa='2412848' src='//ad.a-ads.com/2412848/?size=250x250&background_color=0D1117&title_color=4eb1f7' style='border:0; padding:0; width:250px; height:250px; overflow:hidden; display: block;'></iframe>
                 </div>
+
                 <p>Ads fund our creators. If you wish to browse with no ads, visit our main <a class="font-bold text-gray-400 hover:text-white" href="https://wiimages.world">website.</a></p>
                 <p class="mt-2">©2025 The Wi Images Group. <a class="font-bold text-gray-400 hover:text-white" href="https://wiimages.world/terms-lite">Terms and conditions</a> | <a class="font-bold text-gray-400 hover:text-white" href="https://wiimages.world/legal-lite">Legal</a></p>
             </div>
@@ -129,7 +130,6 @@
             const adRatio = 10; // Show 1 ad per 10 images
 
             // --- DOM ELEMENTS ---
-            // adTemplate is no longer needed
             const searchForm = document.getElementById('search-form');
             const searchInput = document.getElementById('search-input');
             const imageContainer = document.getElementById('image-container');
@@ -232,10 +232,11 @@
                     imageCard.innerHTML = `<img src="${photo.src.large}" alt="${photo.alt || 'Pexels Image'}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110 no-select" oncontextmenu="return false;">`;
                     imageContainer.appendChild(imageCard);
 
-                    // Reverted to creating the ad element from a string
                     if ((index + 1) % adRatio === 0) {
                         const adElement = document.createElement('div');
-                        adElement.className = 'flex items-center justify-center bg-[#161B22] rounded-lg shadow-lg w-full h-full min-h-[250px] p-2';
+                        // == CHANGED LINE ==
+                        // The container is now fixed to 250x250px instead of stretching
+                        adElement.className = 'flex items-center justify-center bg-[#161B22] rounded-lg shadow-lg w-[250px] h-[250px]';
                         adElement.innerHTML = `<iframe data-aa='2412848' src='//ad.a-ads.com/2412848/?size=250x250&background_color=0D1117&title_color=4eb1f7' style='border:0; padding:0; width:250px; height:250px; overflow:hidden; display: block;'></iframe>`;
                         imageContainer.appendChild(adElement);
                     }
