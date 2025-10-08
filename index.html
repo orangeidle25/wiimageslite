@@ -70,7 +70,7 @@
         </div>
 
         <main id="image-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-            <div class="col-span-full text-center text-gray-500">
+            <div id="placeholder-text" class="col-span-full text-center text-gray-500">
                 <p>Search for something to see the results here. ✨</p>
             </div>
         </main>
@@ -86,7 +86,7 @@
             <span id="page-info" class="text-sm text-gray-400">
                 Showing <span class="font-semibold text-white">1</span> to <span class="font-semibold text-white">50</span> of <span class="font-semibold text-white">10000</span> Results
             </span>
-            <div class="inline-flex mt-2 xs:mt-0">
+            <div class="inline-flex mt-2 xs-mt-0">
                 <button id="prev-button" class="flex items-center justify-center px-4 h-10 text-base font-medium text-white bg-gray-800 rounded-s hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
                     <svg class="w-3.5 h-3.5 me-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5H1m0 0 4 4M1 5l4-4"/></svg>
                     Prev
@@ -100,7 +100,7 @@
 
         <footer class="mt-12">
             <div class="text-center text-gray-500 text-sm">
-                <div class="my-6 flex justify-center">
+                <div id="footer-ad-container" class="my-6 flex justify-center hidden">
                      <iframe data-aa='2412848' src='//ad.a-ads.com/2412848/?size=250x250&background_color=0D1117&title_color=4eb1f7' style='border:0; padding:0; width:250px; height:250px; overflow:hidden; display: block;'></iframe>
                 </div>
 
@@ -127,12 +127,15 @@
             // --- CONFIGURATION ---
             const apiKey = '2nnZ05uTysLUuar5SJHCq8iylMS5tFlWY9TUXMKkH7pSgxLQooV2C0Ei';
             const imagesPerPage = 50;
-            const adRatio = 10; // Show 1 ad per 10 images
+            const adRatio = 10;
 
             // --- DOM ELEMENTS ---
             const searchForm = document.getElementById('search-form');
             const searchInput = document.getElementById('search-input');
             const imageContainer = document.getElementById('image-container');
+            const placeholderText = document.getElementById('placeholder-text');
+            const footerAdContainer = document.getElementById('footer-ad-container');
+            // ... other DOM elements
             const paginationControls = document.getElementById('pagination-controls');
             const pageInfo = document.getElementById('page-info');
             const prevButton = document.getElementById('prev-button');
@@ -148,28 +151,57 @@
             let currentQuery = '';
             let currentPage = 1;
             let currentPhotos = [];
+            let isFirstSearch = true;
 
-            // --- EVENT LISTENERS ---
-            searchForm.addEventListener('submit', handleSearchSubmit);
-            prevButton.addEventListener('click', handlePrevClick);
-            nextButton.addEventListener('click', handleNextClick);
-            imageContainer.addEventListener('click', handleImageClick);
-            modalCloseButton.addEventListener('click', closeModal);
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) closeModal();
-            });
-            downloadButton.addEventListener('click', handleDownload);
+            // --- FUNCTIONS ---
+            
+            const performSearch = (query, page = 1) => {
+                if (!query) return;
 
-            // --- HANDLERS ---
-            function handleSearchSubmit(e) {
+                currentQuery = query;
+                currentPage = page;
+                searchInput.value = query; // Keep input in sync
+                
+                fetchAndDisplayImages(query, page);
+
+                if (isFirstSearch && footerAdContainer) {
+                    footerAdContainer.classList.remove('hidden');
+                    isFirstSearch = false;
+                }
+            };
+            
+            const handleSearchSubmit = (e) => {
                 e.preventDefault();
                 const query = searchInput.value.trim();
                 if (query) {
-                    currentQuery = query;
-                    currentPage = 1;
-                    fetchAndDisplayImages(currentQuery, currentPage);
+                    const newUrl = `/query?=${encodeURIComponent(query)}`;
+                    history.pushState({ query: query }, '', newUrl);
+                    document.title = `${query} - WI Images Lite`;
+                    performSearch(query, 1);
                 }
-            }
+            };
+            
+            const runSearchFromUrl = () => {
+                const path = window.location.pathname;
+                const search = window.location.search;
+                if (path.startsWith('/query') && search.startsWith('?=')) {
+                    const query = decodeURIComponent(search.substring(2));
+                    performSearch(query, 1);
+                }
+            };
+
+            // --- EVENT LISTENERS ---
+            searchForm.addEventListener('submit', handleSearchSubmit);
+
+            window.addEventListener('popstate', (event) => {
+                runSearchFromUrl();
+            });
+
+            // Initial check on page load
+            runSearchFromUrl();
+
+
+            // --- Other Handlers & Functions ---
             function handlePrevClick() {
                 if (currentPage > 1) {
                     currentPage--;
@@ -193,9 +225,18 @@
                 const photoUrl = downloadButton.dataset.photoUrl;
                 if(photoId && photoUrl) downloadAndWatermark(photoUrl, photoId);
             }
+            prevButton.addEventListener('click', handlePrevClick);
+            nextButton.addEventListener('click', handleNextClick);
+            imageContainer.addEventListener('click', handleImageClick);
+            modalCloseButton.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeModal();
+            });
+            downloadButton.addEventListener('click', handleDownload);
 
-            // --- API & DISPLAY ---
+
             async function fetchAndDisplayImages(query, page) {
+                placeholderText.classList.add('hidden');
                 loader.classList.remove('hidden');
                 imageContainer.innerHTML = '';
                 paginationControls.classList.add('hidden');
@@ -233,12 +274,15 @@
                     imageContainer.appendChild(imageCard);
 
                     if ((index + 1) % adRatio === 0) {
-                        const adElement = document.createElement('div');
-                        // == CHANGED LINE ==
-                        // The container is now fixed to 250x250px instead of stretching
-                        adElement.className = 'flex items-center justify-center bg-[#161B22] rounded-lg shadow-lg w-[250px] h-[250px]';
-                        adElement.innerHTML = `<iframe data-aa='2412848' src='//ad.a-ads.com/2412848/?size=250x250&background_color=0D1117&title_color=4eb1f7' style='border:0; padding:0; width:250px; height:250px; overflow:hidden; display: block;'></iframe>`;
-                        imageContainer.appendChild(adElement);
+                        // This wrapper div will fill the grid cell and center the ad container
+                        const adWrapper = document.createElement('div');
+                        adWrapper.className = 'w-full h-full flex justify-center items-center';
+                        
+                        adWrapper.innerHTML = `
+                            <div class="flex items-center justify-center bg-[#161B22] rounded-lg shadow-lg w-[250px] h-[250px]">
+                                <iframe data-aa='2412848' src='//ad.a-ads.com/2412848/?size=250x250&background_color=0D1117&title_color=4eb1f7' style='border:0; padding:0; width:250px; height:250px; overflow:hidden; display: block;'></iframe>
+                            </div>`;
+                        imageContainer.appendChild(adWrapper);
                     }
                 });
             }
@@ -257,7 +301,6 @@
                 nextButton.disabled = !data.next_page;
             }
 
-            // --- MODAL ---
             function openModal(photo) {
                 modalImage.src = photo.src.large2x;
                 modalImage.alt = photo.alt || 'Pexels Image';
@@ -271,8 +314,7 @@
                 modalImage.src = '';
                 downloadStatus.textContent = '';
             }
-
-            // --- WATERMARK & DOWNLOAD ---
+            
             function downloadAndWatermark(photoUrl, photoId) {
                 downloadStatus.textContent = 'Preparing download...';
                 downloadButton.disabled = true;
