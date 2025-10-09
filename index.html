@@ -36,7 +36,9 @@
         #modal-content::after {
             content: 'WI Images'; position: absolute; top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 5vw; font-weight: bold; color: white;
+            /* CHANGED: Made the font size smaller */
+            font-size: 4vw; 
+            font-weight: bold; color: white;
             opacity: 0.5; pointer-events: none; z-index: 10;
         }
     </style>
@@ -86,7 +88,7 @@
             <span id="page-info" class="text-sm text-gray-400">
                 Showing <span class="font-semibold text-white">1</span> to <span class="font-semibold text-white">50</span> of <span class="font-semibold text-white">10000</span> Results
             </span>
-            <div class="inline-flex mt-2 xs-mt-0">
+            <div class="inline-flex mt-2 xs:mt-0">
                 <button id="prev-button" class="flex items-center justify-center px-4 h-10 text-base font-medium text-white bg-gray-800 rounded-s hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
                     <svg class="w-3.5 h-3.5 me-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5H1m0 0 4 4M1 5l4-4"/></svg>
                     Prev
@@ -114,12 +116,16 @@
         <div id="modal-content" class="bg-[#161B22] rounded-lg shadow-xl p-4 relative max-w-4xl w-full text-center">
             <button id="modal-close-button" class="absolute top-2 right-3 text-gray-400 hover:text-white text-3xl font-bold z-20">&times;</button>
             <img id="modal-image" src="" alt="Popup Image" class="w-auto h-auto rounded-md mx-auto mb-6 no-select" oncontextmenu="return false;">
-            <button id="download-button" class="download-button-custom">
-                <svg class="w-5 h-5 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                Free 720p Download (Watermarked)
-            </button>
-            <p id="download-status" class="text-sm text-gray-400 mt-2"></p>
-        </div>
+            
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+                <button id="download-720p-button" class="download-button-custom">
+                    Download 720p (Free)
+                </button>
+                <button id="download-1080p-button" class="download-button-custom">
+                    Download 1080p (Watermarked)
+                </button>
+            </div>
+            <p id="download-status" class="text-sm text-gray-400 mt-2 h-4"></p> </div>
     </div>
 
     <script>
@@ -135,7 +141,6 @@
             const imageContainer = document.getElementById('image-container');
             const placeholderText = document.getElementById('placeholder-text');
             const footerAdContainer = document.getElementById('footer-ad-container');
-            // ... other DOM elements
             const paginationControls = document.getElementById('pagination-controls');
             const pageInfo = document.getElementById('page-info');
             const prevButton = document.getElementById('prev-button');
@@ -144,7 +149,8 @@
             const modal = document.getElementById('modal');
             const modalImage = document.getElementById('modal-image');
             const modalCloseButton = document.getElementById('modal-close-button');
-            const downloadButton = document.getElementById('download-button');
+            const download720pButton = document.getElementById('download-720p-button');
+            const download1080pButton = document.getElementById('download-1080p-button');
             const downloadStatus = document.getElementById('download-status');
 
             // --- STATE ---
@@ -153,17 +159,13 @@
             let currentPhotos = [];
             let isFirstSearch = true;
 
-            // --- FUNCTIONS ---
-            
+            // --- URL & SEARCH LOGIC ---
             const performSearch = (query, page = 1) => {
                 if (!query) return;
-
                 currentQuery = query;
                 currentPage = page;
-                searchInput.value = query; // Keep input in sync
-                
+                searchInput.value = query;
                 fetchAndDisplayImages(query, page);
-
                 if (isFirstSearch && footerAdContainer) {
                     footerAdContainer.classList.remove('hidden');
                     isFirstSearch = false;
@@ -189,52 +191,62 @@
                     performSearch(query, 1);
                 }
             };
-
-            // --- EVENT LISTENERS ---
             searchForm.addEventListener('submit', handleSearchSubmit);
-
-            window.addEventListener('popstate', (event) => {
-                runSearchFromUrl();
-            });
-
-            // Initial check on page load
+            window.addEventListener('popstate', runSearchFromUrl);
             runSearchFromUrl();
 
-
-            // --- Other Handlers & Functions ---
-            function handlePrevClick() {
-                if (currentPage > 1) {
-                    currentPage--;
-                    fetchAndDisplayImages(currentQuery, currentPage);
-                }
-            }
-            function handleNextClick() {
-                currentPage++;
-                fetchAndDisplayImages(currentQuery, currentPage);
-            }
-            function handleImageClick(e) {
+            // --- IMAGE & MODAL HANDLERS ---
+            const handleImageClick = (e) => {
                 const card = e.target.closest('[data-photo-id]');
                 if (card) {
                     const photoId = parseInt(card.dataset.photoId, 10);
                     const photo = currentPhotos.find(p => p.id === photoId);
                     if (photo) openModal(photo);
                 }
-            }
-            function handleDownload() {
-                const photoId = downloadButton.dataset.photoId;
-                const photoUrl = downloadButton.dataset.photoUrl;
-                if(photoId && photoUrl) downloadAndWatermark(photoUrl, photoId);
-            }
-            prevButton.addEventListener('click', handlePrevClick);
-            nextButton.addEventListener('click', handleNextClick);
+            };
             imageContainer.addEventListener('click', handleImageClick);
-            modalCloseButton.addEventListener('click', closeModal);
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) closeModal();
-            });
-            downloadButton.addEventListener('click', handleDownload);
+            modalCloseButton.addEventListener('click', () => closeModal());
+            modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
 
+            // --- DOWNLOAD HANDLERS ---
+            const handle720pDownload = async (e) => {
+                const button = e.currentTarget;
+                const photoId = button.dataset.photoId;
+                const photoUrl = button.dataset.photoUrl;
+                if (!photoId || !photoUrl) return;
 
+                downloadStatus.textContent = 'Preparing free download...';
+                button.disabled = true;
+                
+                try {
+                    const response = await fetch(`${photoUrl}?auto=compress&cs=tinysrgb&h=720`);
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `wi-images-${photoId}-720p-free.jpg`;
+                    link.click();
+                    window.URL.revokeObjectURL(url); // Clean up
+                    downloadStatus.textContent = 'Download started!';
+                } catch (error) {
+                    console.error('Download error:', error);
+                    downloadStatus.textContent = 'Download failed.';
+                } finally {
+                    button.disabled = false;
+                    setTimeout(() => { downloadStatus.textContent = ''; }, 3000);
+                }
+            };
+
+            const handle1080pDownload = (e) => {
+                const button = e.currentTarget;
+                const photoId = button.dataset.photoId;
+                const photoUrl = button.dataset.photoUrl;
+                if(photoId && photoUrl) downloadAndWatermark1080p(photoUrl, photoId, button);
+            };
+            download720pButton.addEventListener('click', handle720pDownload);
+            download1080pButton.addEventListener('click', handle1080pDownload);
+
+            // --- CORE DISPLAY FUNCTIONS ---
             async function fetchAndDisplayImages(query, page) {
                 placeholderText.classList.add('hidden');
                 loader.classList.remove('hidden');
@@ -274,25 +286,19 @@
                     imageContainer.appendChild(imageCard);
 
                     if ((index + 1) % adRatio === 0) {
-                        // This wrapper div will fill the grid cell and center the ad container
                         const adWrapper = document.createElement('div');
                         adWrapper.className = 'w-full h-full flex justify-center items-center';
-                        
-                        adWrapper.innerHTML = `
-                            <div class="flex items-center justify-center bg-[#161B22] rounded-lg shadow-lg w-[250px] h-[250px]">
-                                <iframe data-aa='2412848' src='//ad.a-ads.com/2412848/?size=250x250&background_color=0D1117&title_color=4eb1f7' style='border:0; padding:0; width:250px; height:250px; overflow:hidden; display: block;'></iframe>
-                            </div>`;
+                        adWrapper.innerHTML = `<div class="flex items-center justify-center bg-[#161B22] rounded-lg shadow-lg w-[250px] h-[250px]"><iframe data-aa='2412848' src='//ad.a-ads.com/2412848/?size=250x250&background_color=0D1117&title_color=4eb1f7' style='border:0; padding:0; width:250px; height:250px; overflow:hidden; display: block;'></iframe></div>`;
                         imageContainer.appendChild(adWrapper);
                     }
                 });
             }
 
+            // --- PAGINATION & MODAL ---
             function updatePagination(data) {
-                if (data.total_results === 0) {
-                    paginationControls.classList.add('hidden');
-                    return;
-                }
-                paginationControls.classList.remove('hidden');
+                paginationControls.classList.toggle('hidden', data.total_results === 0);
+                if (data.total_results === 0) return;
+
                 const totalResults = data.total_results;
                 const startItem = (data.page - 1) * imagesPerPage + 1;
                 const endItem = Math.min(startItem + imagesPerPage - 1, totalResults);
@@ -300,12 +306,16 @@
                 prevButton.disabled = !data.prev_page;
                 nextButton.disabled = !data.next_page;
             }
+            prevButton.addEventListener('click', handlePrevClick);
+            nextButton.addEventListener('click', handleNextClick);
 
             function openModal(photo) {
                 modalImage.src = photo.src.large2x;
                 modalImage.alt = photo.alt || 'Pexels Image';
-                downloadButton.dataset.photoId = photo.id;
-                downloadButton.dataset.photoUrl = photo.src.original;
+                download720pButton.dataset.photoId = photo.id;
+                download720pButton.dataset.photoUrl = photo.src.original;
+                download1080pButton.dataset.photoId = photo.id;
+                download1080pButton.dataset.photoUrl = photo.src.original;
                 modal.classList.remove('hidden');
             }
 
@@ -315,9 +325,10 @@
                 downloadStatus.textContent = '';
             }
             
-            function downloadAndWatermark(photoUrl, photoId) {
-                downloadStatus.textContent = 'Preparing download...';
-                downloadButton.disabled = true;
+            // --- WATERMARK & DOWNLOAD 1080p ---
+            function downloadAndWatermark1080p(photoUrl, photoId, button) {
+                downloadStatus.textContent = 'Preparing 1080p download...';
+                button.disabled = true;
 
                 const image = new Image();
                 image.crossOrigin = 'anonymous';
@@ -325,13 +336,12 @@
                 image.onload = () => {
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
-                    const targetHeight = 720;
+                    const targetHeight = 1080; // Set to 1080p
                     const scale = targetHeight / image.height;
                     const targetWidth = image.width * scale;
 
                     canvas.width = targetWidth;
                     canvas.height = targetHeight;
-
                     ctx.drawImage(image, 0, 0, targetWidth, targetHeight);
 
                     const watermarkText = 'WI Images';
@@ -343,21 +353,21 @@
                     ctx.fillText(watermarkText, canvas.width / 2, canvas.height / 2);
                     
                     const link = document.createElement('a');
-                    link.download = `wi-images-${photoId}-watermarked.jpg`;
+                    link.download = `wi-images-${photoId}-1080p-watermarked.jpg`;
                     link.href = canvas.toDataURL('image/jpeg', 0.9);
                     link.click();
                     
                     downloadStatus.textContent = 'Download started!';
-                    downloadButton.disabled = false;
-                    setTimeout(() => downloadStatus.textContent = '', 3000);
+                    button.disabled = false;
+                    setTimeout(() => { downloadStatus.textContent = ''; }, 3000);
                 };
 
                 image.onerror = () => {
-                    downloadStatus.textContent = 'Error loading image for download.';
-                    downloadButton.disabled = false;
+                    downloadStatus.textContent = 'Download failed.';
+                    button.disabled = false;
                 };
 
-                image.src = `${photoUrl}?auto=compress&cs=tinysrgb&h=720`;
+                image.src = `${photoUrl}?auto=compress&cs=tinysrgb&h=1080`;
             }
         });
     </script>
