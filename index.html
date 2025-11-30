@@ -1,21 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+<!-- Developped by QADS.cloud -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale-1.0">
     <title>WI Images Lite</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Simple custom scrollbar for a better look */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #0d1117; }
         ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #374151; }
 
-        /* Ensure the modal image doesn't exceed viewport height */
         #modal-image { max-height: 80vh; }
 
-        /* Custom download button style */
         .download-button-custom {
             display: inline-flex; align-items: center; justify-content: center;
             height: 48px; padding-left: 24px; padding-right: 24px;
@@ -26,13 +24,11 @@
         .download-button-custom:hover { background-color: #2d3748; border-color: #6b7280; }
         .download-button-custom:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        /* Disable text selection and dragging */
         img, .no-select {
             -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
             -webkit-user-drag: none; -moz-user-drag: none; -ms-user-drag: none; user-drag: none;
         }
 
-        /* Watermark for the popup image preview */
         #modal-content::after {
             content: 'WI Images'; position: absolute; top: 50%; left: 50%;
             transform: translate(-50%, -50%);
@@ -165,7 +161,6 @@
                 currentPage = page;
                 searchInput.value = query;
                 fetchAndDisplayImages(query, page);
-                // REMOVED logic that was hiding/showing the footer ad
             };
             
             const handleSearchSubmit = (e) => {
